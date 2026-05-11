@@ -64,6 +64,7 @@ class Producto(db.Model):
     alertas          = db.relationship("Alerta", backref="producto", lazy=True)
 
     def to_dict(self):
+        ctrl = Control_inventario.query.filter_by(id_producto=self.id_producto).first()
         return {
             "id_producto":   self.id_producto,
             "id_categoria":  self.id_categoria,
@@ -72,11 +73,14 @@ class Producto(db.Model):
             "descripcion":   self.descripcion,
             "precio_compra": float(self.precio_compra),
             "precio":        float(self.precio),
-            "ganancia":      float(self.precio) - float(self.precio_compra),
+            "ganancia":      round(float(self.precio) - float(self.precio_compra), 2),
             "tipo_control":  self.tipo_control,
             "estado":        self.estado,
+            "stock_actual":  ctrl.stock_actual if ctrl else 0,
+            "stock_minimo":  ctrl.stock_minimo if ctrl else 0,
+            "nivel_estado":  ctrl.nivel_estado if ctrl else None,
+            "id_control":    ctrl.id_control if ctrl else None,
         }
-
 
 class Control_inventario(db.Model):
     __tablename__ = "Control_inventario"
@@ -87,7 +91,7 @@ class Control_inventario(db.Model):
     stock_minimo        = db.Column(db.Integer, nullable=False, default=0)
     cantidad_cajones    = db.Column(db.Integer, default=0)
     cajones_abiertos    = db.Column(db.Integer, default=0)
-    nivel_actual        = db.Column(db.String(10))
+    
     nivel_estado        = db.Column(db.Enum('LLENO', 'MEDIO', 'BAJO'), nullable=True)
     fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -111,7 +115,7 @@ class Control_inventario(db.Model):
             "stock_minimo":        self.stock_minimo,
             "cantidad_cajones":    self.cantidad_cajones,
             "cajones_abiertos":    self.cajones_abiertos,
-            "nivel_actual":        self.nivel_actual,
+            
             "nivel_estado":        self.nivel_estado, 
             "fecha_actualizacion": str(self.fecha_actualizacion),
         }

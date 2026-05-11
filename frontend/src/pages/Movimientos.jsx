@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import api from '../services/api'
 
 const FORM_VACIO = { id_producto: '', tipo: 'entrada', cantidad: '', observacion: '' }
@@ -11,12 +12,26 @@ export default function Movimientos() {
   const [error,       setError]       = useState('')
   const [filtroTipo,  setFiltroTipo]  = useState('')
 
+  const [searchParams] = useSearchParams()
+
   const cargar = () => {
     const params = filtroTipo ? `?tipo=${filtroTipo}&limit=100` : '?limit=100'
     api.get(`/movimientos/${params}`).then(r => setMovimientos(r.data))
-    api.get('/productos/?activos=true').then(r => setProductos(r.data))
+    api.get('/productos/?activos=true').then(r => {
+      const lista = r.data.filter(p => p.tipo_control !== 'nivel')
+      setProductos(lista)
+    })
   }
   useEffect(cargar, [filtroTipo])
+
+  // Abre modal automáticamente si viene desde Productos con el botón + Mov.
+  useEffect(() => {
+    const idProducto = searchParams.get('id_producto')
+    if (idProducto) {
+      setForm({ id_producto: idProducto, tipo: 'salida', cantidad: '', observacion: '' })
+      setModal(true)
+    }
+  }, [searchParams])
 
   const registrar = async (e) => {
     e.preventDefault(); setError('')

@@ -56,15 +56,33 @@ def resumen_inventario():
     controles = (
         Control_inventario.query.join(Producto).filter(Producto.estado == True).all()
     )
-    total      = len(controles)
-    alto       = sum(1 for c in controles if c.nivel_actual == "alto")
-    medio      = sum(1 for c in controles if c.nivel_actual == "medio")
-    bajo       = sum(1 for c in controles if c.nivel_actual == "bajo")
-    critico    = sum(1 for c in controles if c.nivel_actual == "critico")
+    total  = len(controles)
+    lleno  = 0
+    medio  = 0
+    bajo   = 0
+
+    for c in controles:
+        if c.tipo_control == "nivel":
+            # Usa nivel_estado (ENUM: LLENO, MEDIO, BAJO)
+            if c.nivel_estado == "LLENO":
+                lleno += 1
+            elif c.nivel_estado == "MEDIO":
+                medio += 1
+            else:
+                bajo += 1
+        else:
+            # Usa stock numérico para unidad y caja
+            if c.stock_actual <= 0 or c.stock_actual <= c.stock_minimo:
+                bajo += 1
+            elif c.stock_actual <= c.stock_minimo * 2:
+                medio += 1
+            else:
+                lleno += 1
+
     return jsonify({
         "total_productos": total,
-        "nivel_alto":      alto,
-        "nivel_medio":     medio,
-        "nivel_bajo":      bajo,
-        "nivel_critico":   critico,
+        "nivel_alto":      lleno,   # verde
+        "nivel_medio":     medio,   # amarillo
+        "nivel_bajo":      bajo,    # rojo
+        "nivel_critico":   0,       # ya no se usa, queda en 0
     }), 200

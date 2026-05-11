@@ -12,6 +12,10 @@ def get_productos():
     query = Producto.query
     if solo_activos:
         query = query.filter_by(estado=True)
+    if request.args.get("id_categoria"):
+        query = query.filter_by(id_categoria=request.args.get("id_categoria", type=int))
+    if request.args.get("tipo_control"):
+        query = query.filter_by(tipo_control=request.args.get("tipo_control"))
     return jsonify([p.to_dict() for p in query.all()]), 200
 
 
@@ -54,7 +58,7 @@ def crear_producto():
         tipo_control     = producto.tipo_control,
         stock_actual     = data.get("stock_inicial", 0),
         stock_minimo     = data.get("stock_minimo", 5),
-        nivel_actual     = "alto" if data.get("stock_inicial", 0) > 0 else "critico",
+        nivel_estado = data.get("nivel_estado", "LLENO") if es_nivel else None,
     )
     db.session.add(control)
     db.session.commit()
@@ -84,6 +88,10 @@ def actualizar_producto(id):
     # Actualizar también el tipo_control del control de inventario
     if producto.control:
         producto.control.tipo_control = producto.tipo_control
+        if producto.tipo_control == "nivel":
+            producto.control.nivel_estado = data.get("nivel_estado", producto.control.nivel_estado)
+        else:
+            producto.control.nivel_estado = None
 
     db.session.commit()
     return jsonify(producto.to_dict()), 200
