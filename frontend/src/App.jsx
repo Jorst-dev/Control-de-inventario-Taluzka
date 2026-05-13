@@ -6,7 +6,6 @@ import Layout       from './components/Layout'
 import Dashboard    from './pages/Dashboard'
 import Productos    from './pages/Productos'
 import Categorias   from './pages/Categorias'
-import Inventario   from './pages/Inventario'
 import Movimientos  from './pages/Movimientos'
 import Alertas      from './pages/Alertas'
 import Usuarios     from './pages/Usuarios'
@@ -31,7 +30,6 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="productos"   element={<Productos />} />
             <Route path="categorias"  element={<Categorias />} />
-            <Route path="inventario"  element={<Inventario />} />
             <Route path="movimientos" element={<Movimientos />} />
             <Route path="alertas"     element={<Alertas />} />
             <Route path="usuarios"    element={

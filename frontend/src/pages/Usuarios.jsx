@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import { Pencil, ToggleLeft, ToggleRight } from "lucide-react"
 
 const FORM_VACIO = { nombre: '', email: '', contrasena: '', rol: 'vendedor', acceso_total: false }
 
@@ -35,9 +36,11 @@ export default function Usuarios() {
     }
   }
 
-  const desactivar = async (id) => {
-    if (!confirm('¿Desactivar este usuario?')) return
-    await api.delete(`/usuarios/${id}`); cargar()
+  const cambiarEstado = async (id, nuevoEstado) => {
+    const mensaje = nuevoEstado ? '¿Activar este usuario?' : '¿Desactivar este usuario?'
+    if (!confirm(mensaje)) return
+    await api.put(`/usuarios/${id}`, { estado: nuevoEstado })
+    cargar()
   }
 
   return (
@@ -80,16 +83,37 @@ export default function Usuarios() {
                   </span>
                 </td>
                 <td style={{ padding: '10px 14px', fontSize: 12 }}>{u.fecha_registro}</td>
-                <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
-                  <button onClick={() => abrirEditar(u)}
-                    style={{ background: '#1e3a5f', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                    Editar
+
+
+                <td style={{ padding:'10px 14px', display:'flex', gap:6 }}>
+                  <button onClick={()=>abrirEditar(u)}
+                    style={{ background:'#28a745', color: '#fff', border:'none',
+                      padding:'6px 12px', borderRadius:6, cursor:'pointer' }}
+                      title="Editar"
+                      >
+                    <Pencil size={15} />
                   </button>
-                  <button onClick={() => desactivar(u.id_usuario)}
-                    style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                    Desactivar
-                  </button>
+                  {u.estado === true || u.estado === 1 ? (
+                    <button onClick={() => cambiarEstado(u.id_usuario, false)}
+                      style={{ background:'#d4071b', color: '#fff', border:'none',
+                        padding:'6px 12px', borderRadius:6, cursor:'pointer', fontSize:12 }}
+                        title="Desactivar"
+                        >
+                          <ToggleRight size={15} />
+                    </button>
+                  ) : (
+                    <button onClick={() => cambiarEstado(u.id_usuario, true)}
+                      style={{ background:'#28a745', color: '#fff', border:'none',
+                        padding:'6px 12px', borderRadius:6, cursor:'pointer', fontSize:12 }}
+                        title="Activar"
+                        >
+                          <ToggleLeft size={15} />
+                    </button>
+                  )}
                 </td>
+
+
+
               </tr>
             ))}
           </tbody>

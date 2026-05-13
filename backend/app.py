@@ -12,7 +12,6 @@ from routes.usuarios   import usuarios_bp
 from routes.categorias import categorias_bp
 from routes.productos  import productos_bp
 from routes.movimientos import movimientos_bp
-from routes.inventario import inventario_bp
 from routes.alertas    import alertas_bp
 
 
@@ -32,7 +31,6 @@ def create_app():
     app.register_blueprint(categorias_bp)
     app.register_blueprint(productos_bp)
     app.register_blueprint(movimientos_bp)
-    app.register_blueprint(inventario_bp)
     app.register_blueprint(alertas_bp)
 
     # Manejo de errores globales

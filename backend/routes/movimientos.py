@@ -38,7 +38,29 @@ def get_movimientos():
 
     return jsonify([m.to_dict() for m in query.limit(limit).all()]), 200
 
+@movimientos_bp.route("/resumen/hoy", methods=["GET"])
+@jwt_required()
+def resumen_hoy():
+    from datetime import date
+    hoy = date.today()
+    entradas = Movimiento.query.filter(
+        Movimiento.tipo == "entrada",
+        db.func.date(Movimiento.fecha) == hoy
+    ).count()
+    salidas = Movimiento.query.filter(
+        Movimiento.tipo == "salida",
+        db.func.date(Movimiento.fecha) == hoy
+    ).count()
+    return jsonify({
+        "entradas_hoy": entradas,
+        "salidas_hoy":  salidas,
+    }), 200
 
+
+
+
+
+@movimientos_bp.route("/", methods=["POST"])
 @movimientos_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_movimiento(id):
@@ -49,7 +71,8 @@ def get_movimiento(id):
 @movimientos_bp.route("/", methods=["POST"])
 @jwt_required()
 def registrar_movimiento():
-    usuario_id = int(get_jwt_identity())
+    identity   = get_jwt_identity()
+    usuario_id = identity.get("id") if isinstance(identity, dict) else int(identity)
     data = request.get_json()
 
     campos = ["id_producto", "tipo", "cantidad"]
@@ -82,7 +105,8 @@ def registrar_movimiento():
         control.stock_actual += cantidad
 
     # Actualizar nivel
-    control.nivel_actual        = control.calcular_nivel()
+    #control.nivel_actual        = control.calcular_nivel()
+    #control.fecha_actualizacion = datetime.utcnow()
     control.fecha_actualizacion = datetime.utcnow()
 
     # Registrar movimiento
@@ -101,3 +125,4 @@ def registrar_movimiento():
 
     db.session.commit()
     return jsonify(nuevo_movimiento.to_dict()), 201
+

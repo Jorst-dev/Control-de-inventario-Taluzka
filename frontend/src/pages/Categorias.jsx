@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import { Pencil, ToggleLeft, ToggleRight } from "lucide-react"
 
 const FORM_VACIO = { nombre: '', descripcion: '' }
 
@@ -30,9 +31,11 @@ export default function Categorias() {
     }
   }
 
-  const eliminar = async (id) => {
-    if (!confirm('¿Desactivar esta categoría?')) return
-    await api.delete(`/categorias/${id}`); cargar()
+  const cambiarEstado = async (id, nuevoEstado) => {
+    const mensaje = nuevoEstado ? '¿Activar esta categoría?' : '¿Desactivar esta categoría?'
+    if (!confirm(mensaje)) return
+    await api.put(`/categorias/${id}`, { estado: nuevoEstado })
+    cargar()
   }
 
   return (
@@ -69,13 +72,28 @@ export default function Categorias() {
                 </td>
                 <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
                   <button onClick={() => abrirEditar(c)}
-                    style={{ background: '#1e3a5f', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                    Editar
+                    style={{ background: '#1e3a5f', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: 4, cursor: 'pointer' }}title="Editar"
+                      >
+                    <Pencil size={15} />
                   </button>
-                  <button onClick={() => eliminar(c.id_categoria)}
-                    style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                    Desactivar
-                  </button>
+
+                  {c.estado === true || c.estado === 1 ? (
+                    <button onClick={() => cambiarEstado(c.id_categoria, false)}
+                      style={{ background:'#d4071b', color: '#fff', border:'none', 
+                        padding:'6px 12px', borderRadius:6, cursor:'pointer', fontSize: 12}}
+                      title="Desactivar"
+                        >
+                          <ToggleRight size={15} />
+                    </button>
+                  ) : (
+                    <button onClick={() => cambiarEstado(c.id_categoria, true)}
+                      style={{ background:'#28a745', color: '#fff', border:'none', padding:'6px 12px', borderRadius:4, cursor:'pointer',fontSize: 12 }}
+                      title="Activar"
+                        >
+                          <ToggleLeft size={15} />
+                    </button>
+
+                  )}
                 </td>
               </tr>
             ))}

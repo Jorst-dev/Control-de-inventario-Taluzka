@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { Pencil, ArrowRightLeft, ToggleLeft, ToggleRight } from "lucide-react"
+
 
 const FORM_VACIO = {
   nombre: '', id_categoria: '', descripcion: '',
@@ -22,7 +24,7 @@ export default function Productos() {
   
   const [filtroCat,  setFiltroCat]  = useState('')
   const [filtroTipo, setFiltroTipo] = useState('')
-
+  const [verDesc, setVerDesc] = useState(null) // guarda el producto seleccionado
   const cargar = () => {
     api.get('/productos/').then(r => setProductos(r.data))
     api.get('/categorias/?activas=true').then(r => setCategorias(r.data))
@@ -76,7 +78,7 @@ export default function Productos() {
     if (!pc) return '0%'
     return ((parseFloat(p.precio) - pc) / pc * 100).toFixed(1) + '%'
   }
-
+  
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -119,7 +121,7 @@ export default function Productos() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
           <thead>
             <tr style={{ background: '#1e3a5f', color: '#fff' }}>
-              {['Nombre','Categoría','P. Compra','P. Venta','Ganancia','Margen','Stock Actual','Acciones'].map(h => (
+              {['','Nombre','Categoría','P. Compra','P. Venta','Ganancia','Margen','Stock Actual','Acciones'].map(h => (
                 <th key={h} style={{ padding: '12px 14px', textAlign: 'left' }}>{h}</th>
               ))}
             </tr>
@@ -127,6 +129,18 @@ export default function Productos() {
           <tbody>
             {filtrados.map((p, i) => (
               <tr key={p.id_producto} style={{ background: i % 2 === 0 ? '#f9f9f9' : '#fff', borderBottom: '1px solid #eee' }}>
+                
+                <td style={{ padding: '1px 1px', textAlign: 'center', width: 36 }}>
+                  {p.descripcion && (
+                    <span
+                      onClick={() => setVerDesc(p)}
+                      title="Ver descripción"
+                      style={{ cursor: 'pointer', fontSize: 16 }}>
+                      👁️
+                    </span>
+                  )}
+                </td>
+
                 <td style={{ padding: '10px 14px', fontWeight: 600 }}>{p.nombre}</td>
                 <td style={{ padding: '10px 14px' }}>{p.categoria}</td>
                 <td style={{ padding: '10px 14px' }}>S/. {parseFloat(p.precio_compra).toFixed(2)}</td>
@@ -158,30 +172,44 @@ export default function Productos() {
                 
 
                 <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
+
+
                   <button onClick={() => abrirEditar(p)}
-                    style={{ background: '#1e3a5f', color: '#fff', border: 'none',
-                      padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                    Editar
+                    style={{ background: '#28a745', color: '#fff', border: 'none',
+                      padding: '5px 12px', borderRadius: 4, cursor: 'pointer' }}
+                      title="Editar"
+                      >
+                    <Pencil size={15} />
                   </button>
+
+
                   {p.tipo_control !== 'nivel' && (
                     <button
                       onClick={() => navigate(`/movimientos?id_producto=${p.id_producto}&nombre=${encodeURIComponent(p.nombre)}`)}
-                      style={{ background: '#28a745', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                      + Mov.
+                      style={{ background: '#013fe9', color: '#fff', border: 'none',
+                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer'}}
+                     title="Movimientos"
+                    >
+                      <ArrowRightLeft size={15} />
                     </button>
                   )}
                   {p.estado === true || p.estado === 1 ? (
                     <button onClick={() => cambiarEstado(p.id_producto, false)}
-                      style={{ background: '#dc3545', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                      Desactivar
+                      style={{ background: '#d4071b', color: '#fff', border: 'none',
+                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+
+                        title="Desactivar"
+                        >
+                          <ToggleRight size={15} />
                     </button>
                   ) : (
                     <button onClick={() => cambiarEstado(p.id_producto, true)}
-                      style={{ background: '#fd7e14', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
-                      Activar
+                      style={{ background: '#28a745', color: '#fff', border: 'none',
+                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+
+                        title="Activar"
+                        >
+                          <ToggleLeft size={15} />
                     </button>
                   )}
                 </td>
@@ -189,11 +217,15 @@ export default function Productos() {
               </tr>
             ))}
             {filtrados.length === 0 && (
-              <tr><td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#999' }}>Sin productos</td></tr>
+              <tr><td colSpan={9} style={{ padding: 20, textAlign: 'center', color: '#999' }}>Sin productos</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+
+            
+
 
       {/* Modal */}
       {modal && (
@@ -205,7 +237,7 @@ export default function Productos() {
             <form onSubmit={guardar}>
               {[
                 { label: 'Nombre', key: 'nombre', type: 'text', required: true },
-                { label: 'Descripción', key: 'descripcion', type: 'text' },
+                
                 { label: 'Precio de Compra (S/.)', key: 'precio_compra', type: 'number', step: '0.01', required: true },
                 { label: 'Precio de Venta (S/.)', key: 'precio', type: 'number', step: '0.01', required: true },
               ].map(f => (
@@ -218,6 +250,19 @@ export default function Productos() {
                   />
                 </div>
               ))}
+
+              {/* Descripción como textarea */}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Descripción</label>
+                <textarea
+                  value={form.descripcion}
+                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                  rows={3}
+                  
+                  style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd',
+                    borderRadius: 4, fontSize: 14, boxSizing: 'border-box', resize: 'vertical' }}
+                />
+              </div>
 
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Categoría</label>
@@ -241,58 +286,60 @@ export default function Productos() {
               </div>
 
               {/* Si tipo nivel: mostrar selector de color, en crear Y editar */}
-{form.tipo_control === 'nivel' && (
-  <div style={{ marginBottom: 14 }}>
-    <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>
-      Estado de Nivel
-    </label>
-    <div style={{ display: 'flex', gap: 10 }}>
-      {[
-        { valor: 'LLENO', label: 'LLENO',  bg: '#d4edda', color: '#155724', borde: '#28a745' },
-        { valor: 'MEDIO', label: 'MEDIO',  bg: '#fff3cd', color: '#856404', borde: '#e6a817' },
-        { valor: 'BAJO',  label: 'BAJO',   bg: '#f8d7da', color: '#721c24', borde: '#dc3545' },
-      ].map(n => (
-        <button
-          key={n.valor}
-          type="button"
-          onClick={() => setForm({ ...form, nivel_estado: n.valor })}
-          style={{
-            flex: 1,
-            padding: '12px 6px',
-            border: `2px solid ${form.nivel_estado === n.valor ? n.borde : '#ddd'}`,
-            background: form.nivel_estado === n.valor ? n.bg : '#fff',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontWeight: form.nivel_estado === n.valor ? 700 : 400,
-            fontSize: 13,
-            color: form.nivel_estado === n.valor ? n.color : '#aaa',
-            transition: 'all .15s',
-          }}
-        >
-          {n.valor === 'LLENO' ? '🟢' : n.valor === 'MEDIO' ? '🟡' : '🔴'} {n.label}
-        </button>
-      ))}
-    </div>
-  </div>
-)}
+                {form.tipo_control === 'nivel' && (
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>
+                      Estado de Nivel
+                    </label>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      {[
+                        { valor: 'LLENO', label: 'LLENO',  bg: '#d4edda', color: '#155724', borde: '#28a745' },
+                        { valor: 'MEDIO', label: 'MEDIO',  bg: '#fff3cd', color: '#856404', borde: '#e6a817' },
+                        { valor: 'BAJO',  label: 'BAJO',   bg: '#f8d7da', color: '#721c24', borde: '#dc3545' },
+                      ].map(n => (
+                        <button
+                          key={n.valor}
+                          type="button"
+                          onClick={() => setForm({ ...form, nivel_estado: n.valor })}
+                          style={{
+                            flex: 1,
+                            padding: '12px 6px',
+                            border: `2px solid ${form.nivel_estado === n.valor ? n.borde : '#ddd'}`,
+                            background: form.nivel_estado === n.valor ? n.bg : '#fff',
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            fontWeight: form.nivel_estado === n.valor ? 700 : 400,
+                            fontSize: 13,
+                            color: form.nivel_estado === n.valor ? n.color : '#aaa',
+                            transition: 'all .15s',
+                          }}
+                        >
+                          {n.valor === 'LLENO' ? '🟢' : n.valor === 'MEDIO' ? '🟡' : '🔴'} {n.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-{/* Si tipo unidad o caja: mostrar stock (solo al crear) */}
-{!editId && form.tipo_control !== 'nivel' && (
-  <>
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Inicial</label>
-      <input type="number" min="0" value={form.stock_inicial}
-        onChange={e => setForm({ ...form, stock_inicial: parseInt(e.target.value) })}
-        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
-    </div>
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Mínimo</label>
-      <input type="number" min="0" value={form.stock_minimo}
-        onChange={e => setForm({ ...form, stock_minimo: parseInt(e.target.value) })}
-        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
-    </div>
-  </>
-)}
+              {/* Si tipo unidad o caja: mostrar stock (solo al crear) */}
+              {form.tipo_control !== 'nivel' && (
+                <>
+                  {!editId && (
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Inicial</label>
+                      <input type="number" min="0" value={form.stock_inicial}
+                        onChange={e => setForm({ ...form, stock_inicial: parseInt(e.target.value) })}
+                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
+                    </div>
+                  )}
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Mínimo</label>
+                    <input type="number" min="0" value={form.stock_minimo}
+                      onChange={e => setForm({ ...form, stock_minimo: parseInt(e.target.value) })}
+                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
+                  </div>
+                </>
+              )}
 
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
                 <button type="button" onClick={() => setModal(false)}
@@ -308,6 +355,49 @@ export default function Productos() {
           </div>
         </div>
       )}
+
+
+      {/* Mini modal descripción */}
+      {verDesc && (
+        <div
+          onClick={() => setVerDesc(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.4)',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center', zIndex: 2000,
+          }}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff', borderRadius: 8,
+              padding: 24, width: 340,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', marginBottom: 12 }}>
+              <strong style={{ color: '#1e3a5f', fontSize: 15 }}>
+                {verDesc.nombre}
+              </strong>
+              <span
+                onClick={() => setVerDesc(null)}
+                style={{ cursor: 'pointer', fontSize: 18, color: '#aaa',
+                  lineHeight: 1, padding: '0 4px' }}>
+                ✕
+              </span>
+            </div>
+            <pre style={{
+              margin: 0, fontSize: 13, color: '#444',
+              whiteSpace: 'pre-wrap', fontFamily: 'inherit',
+              lineHeight: 1.6,
+            }}>
+              {verDesc.descripcion || 'Sin descripción'}
+            </pre>
+          </div>
+        </div>
+      )}
+
+
     </div>
   )
 }

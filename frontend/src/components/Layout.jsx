@@ -27,7 +27,6 @@ export default function Layout() {
     { to: '/',            label: 'Dashboard' },
     { to: '/productos',   label: 'Productos' },
     { to: '/categorias',  label: 'Categorías' },
-    { to: '/inventario',  label: 'Inventario' },
     { to: '/movimientos', label: 'Movimientos' },
     { to: '/alertas',     label: `Alertas${alertasPendientes > 0 ? ` (${alertasPendientes})` : ''}` },
     ...(usuario?.rol === 'admin' ? [{ to: '/usuarios', label: 'Usuarios' }] : []),

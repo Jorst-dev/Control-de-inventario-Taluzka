@@ -18,16 +18,65 @@ def get_productos():
         query = query.filter_by(tipo_control=request.args.get("tipo_control"))
     return jsonify([p.to_dict() for p in query.all()]), 200
 
-
-@productos_bp.route("/<int:id>", methods=["GET"])
+# Endpoint especial: ganancia y margen de todos los productos
+@productos_bp.route("/precios/resumen", methods=["GET"])
 @jwt_required()
-def get_producto(id):
-    p = Producto.query.get_or_404(id)
-    data = p.to_dict()
-    if p.control:
-        data["control"] = p.control.to_dict()
-    return jsonify(data), 200
+def resumen_precios():
+    productos = Producto.query.filter_by(estado=True).all()
+    resultado = []
+    for p in productos:
+        pc = float(p.precio_compra)
+        pv = float(p.precio)
+        ganancia = pv - pc
+        margen = round((ganancia / pc * 100), 2) if pc > 0 else 0
+        resultado.append({
+            "id_producto":   p.id_producto,
+            "nombre":        p.nombre,
+            "precio_compra": pc,
+            "precio_venta":  pv,
+            "ganancia":      ganancia,
+            "margen_%":      margen,
+            "stock_actual":  p.control.stock_actual if p.control else 0,
+        })
+    return jsonify(resultado), 200
 
+
+
+@productos_bp.route("/resumen/dashboard", methods=["GET"])
+@jwt_required()
+def resumen_dashboard():
+    from models import Control_inventario
+    controles = (
+        Control_inventario.query.join(Producto).filter(Producto.estado == True).all()
+    )
+    total  = len(controles)
+    lleno  = 0
+    medio  = 0
+    bajo   = 0
+
+    for c in controles:
+        if c.tipo_control == "nivel":
+            if c.nivel_estado == "LLENO":
+                lleno += 1
+            elif c.nivel_estado == "MEDIO":
+                medio += 1
+            else:
+                bajo += 1
+        else:
+            if c.stock_actual <= 0 or c.stock_actual <= c.stock_minimo:
+                bajo += 1
+            elif c.stock_actual <= c.stock_minimo * 2:
+                medio += 1
+            else:
+                lleno += 1
+
+    return jsonify({
+        "total_productos": total,
+        "nivel_alto":      lleno,
+        "nivel_medio":     medio,
+        "nivel_bajo":      bajo,
+        "nivel_critico":   0,
+    }), 200
 
 @productos_bp.route("/", methods=["POST"])
 @jwt_required()
@@ -53,16 +102,28 @@ def crear_producto():
     db.session.flush()  # Obtener id_producto antes del commit
 
     # Crear automáticamente el control de inventario
+    es_nivel = producto.tipo_control == "nivel"
     control = Control_inventario(
-        id_producto      = producto.id_producto,
-        tipo_control     = producto.tipo_control,
-        stock_actual     = data.get("stock_inicial", 0),
-        stock_minimo     = data.get("stock_minimo", 5),
+        id_producto  = producto.id_producto,
+        tipo_control = producto.tipo_control,
+        stock_actual = 0 if es_nivel else data.get("stock_inicial", 0),
+        stock_minimo = 0 if es_nivel else data.get("stock_minimo", 5),
         nivel_estado = data.get("nivel_estado", "LLENO") if es_nivel else None,
     )
     db.session.add(control)
     db.session.commit()
     return jsonify(producto.to_dict()), 201
+
+
+@productos_bp.route("/<int:id>", methods=["GET"])
+@jwt_required()
+def get_producto(id):
+    p = Producto.query.get_or_404(id)
+    data = p.to_dict()
+    if p.control:
+        data["control"] = p.control.to_dict()
+    return jsonify(data), 200
+
 
 
 @productos_bp.route("/<int:id>", methods=["PUT"])
@@ -89,7 +150,24 @@ def actualizar_producto(id):
     if producto.control:
         producto.control.tipo_control = producto.tipo_control
         if producto.tipo_control == "nivel":
-            producto.control.nivel_estado = data.get("nivel_estado", producto.control.nivel_estado)
+            nuevo_nivel = data.get("nivel_estado", producto.control.nivel_estado)
+            producto.control.nivel_estado = nuevo_nivel
+
+            # Alerta automática solo cuando pasa a BAJO
+            if nuevo_nivel == "BAJO":
+                from models import Alerta
+                alerta_existente = Alerta.query.filter_by(
+                    id_producto=producto.id_producto,
+                    estado="pendiente"
+                ).first()
+                if not alerta_existente:
+                    nueva_alerta = Alerta(
+                        id_producto      = producto.id_producto,
+                        id_control       = producto.control.id_control,
+                        stock_al_generar = 0,
+                        estado           = "pendiente",
+                    )
+                    db.session.add(nueva_alerta)
         else:
             producto.control.nivel_estado = None
 
@@ -105,25 +183,3 @@ def eliminar_producto(id):
     db.session.commit()
     return jsonify({"mensaje": "Producto desactivado"}), 200
 
-
-# Endpoint especial: ganancia y margen de todos los productos
-@productos_bp.route("/precios/resumen", methods=["GET"])
-@jwt_required()
-def resumen_precios():
-    productos = Producto.query.filter_by(estado=True).all()
-    resultado = []
-    for p in productos:
-        pc = float(p.precio_compra)
-        pv = float(p.precio)
-        ganancia = pv - pc
-        margen = round((ganancia / pc * 100), 2) if pc > 0 else 0
-        resultado.append({
-            "id_producto":   p.id_producto,
-            "nombre":        p.nombre,
-            "precio_compra": pc,
-            "precio_venta":  pv,
-            "ganancia":      ganancia,
-            "margen_%":      margen,
-            "stock_actual":  p.control.stock_actual if p.control else 0,
-        })
-    return jsonify(resultado), 200

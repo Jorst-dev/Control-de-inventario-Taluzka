@@ -73,6 +73,8 @@ def actualizar_usuario(id):
     usuario.email        = data.get("email", usuario.email)
     usuario.rol          = data.get("rol", usuario.rol)
     usuario.acceso_total = data.get("acceso_total", usuario.acceso_total)
+    if "estado" in data:
+        usuario.estado = data["estado"]
 
     if data.get("contrasena"):
         hash_pw = bcrypt.hashpw(data["contrasena"].encode(), bcrypt.gensalt())
