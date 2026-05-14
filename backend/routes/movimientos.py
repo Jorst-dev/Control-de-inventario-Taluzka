@@ -60,7 +60,7 @@ def resumen_hoy():
 
 
 
-@movimientos_bp.route("/", methods=["POST"])
+#@movimientos_bp.route("/", methods=["POST"])
 @movimientos_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_movimiento(id):
