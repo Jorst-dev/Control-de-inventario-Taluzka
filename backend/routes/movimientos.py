@@ -41,15 +41,16 @@ def get_movimientos():
 @movimientos_bp.route("/resumen/hoy", methods=["GET"])
 @jwt_required()
 def resumen_hoy():
-    from datetime import date
-    hoy = date.today()
+    from datetime import datetime
+    hoy_str = datetime.utcnow().strftime('%Y-%m-%d')
+    
     entradas = Movimiento.query.filter(
         Movimiento.tipo == "entrada",
-        db.func.date(Movimiento.fecha) == hoy
+        db.func.date(Movimiento.fecha) == hoy_str
     ).count()
     salidas = Movimiento.query.filter(
         Movimiento.tipo == "salida",
-        db.func.date(Movimiento.fecha) == hoy
+        db.func.date(Movimiento.fecha) == hoy_str
     ).count()
     return jsonify({
         "entradas_hoy": entradas,
@@ -112,7 +113,7 @@ def registrar_movimiento():
     # Actualizar nivel
     #control.nivel_actual        = control.calcular_nivel()
     #control.fecha_actualizacion = datetime.utcnow()
-    control.fecha_actualizacion = datetime.utcnow()
+    #control.fecha_actualizacion = datetime.utcnow()
 
     # Registrar movimiento
     nuevo_movimiento = Movimiento(
