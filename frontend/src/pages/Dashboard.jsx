@@ -73,6 +73,8 @@ export default function Dashboard() {
       setLoading(false)
     }
     cargar()
+    window.addEventListener('focus', cargar)
+    return () => window.removeEventListener('focus', cargar)
   }, [])
 
 

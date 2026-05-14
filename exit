@@ -1,0 +1,23 @@
+[33mcommit 82ab80d7240c6ab6fcd58957e86ab86bdd782c5d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfix/dasboard[m[33m)[m
+Author: Jorst-IA <jorstfranklin777@gmail.com>
+Date:   Wed May 13 21:22:53 2026 -0500
+
+    Problema con movimientos no ser guardaban solucionado
+
+[33mcommit 4b52663b35660008ebc0337d1693f76a8d6c6a98[m[33m ([m[1;31morigin/fix/dasboard[m[33m)[m
+Author: Jorst-IA <jorstfranklin777@gmail.com>
+Date:   Wed May 13 18:53:37 2026 -0500
+
+    Todos los menus terminados, ver que mejorar de funcionalidades y campos
+
+[33mcommit 0fa23929a8e9865eb520f10cbe101c1a6b4abdb5[m[33m ([m[1;31morigin/fix/product[m[33m, [m[1;32mfix/product[m[33m)[m
+Author: Jorst-IA <jorstfranklin777@gmail.com>
+Date:   Mon May 11 17:53:24 2026 -0500
+
+    Dasboard de producto 90% finalizado
+
+[33mcommit 260f29d871016a21259a6d813d4261029d52fa8e[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Jorst-IA <jorstfranklin777@gmail.com>
+Date:   Sun May 10 22:19:47 2026 -0500
+
+    Primera version del inventario de la ferreteria Taluzka1

@@ -34,7 +34,11 @@ export default function Alertas() {
     p = `?estado=${filtroEstado}`
     api.get(`/alertas/${p}`).then(r => setAlertas(r.data))
   }
-  useEffect(cargar, [filtroEstado])
+  useEffect(() => {
+  cargar()
+  window.addEventListener('focus', cargar)
+  return () => window.removeEventListener('focus', cargar)
+}, [filtroEstado])
 
   const pasarEnProceso = async (id) => {
     await api.put(`/alertas/${id}/en_proceso`); cargar()

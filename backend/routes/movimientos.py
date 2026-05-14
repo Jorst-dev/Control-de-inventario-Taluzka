@@ -104,6 +104,11 @@ def registrar_movimiento():
     else:
         control.stock_actual += cantidad
 
+        if control.stock_actual > control.stock_minimo:
+            Alerta.query.filter_by(
+                id_producto=producto.id_producto,
+                estado="pendiente"
+            ).update({"estado": "resuelta"})
     # Actualizar nivel
     #control.nivel_actual        = control.calcular_nivel()
     #control.fecha_actualizacion = datetime.utcnow()
