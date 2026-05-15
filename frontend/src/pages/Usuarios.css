@@ -1,0 +1,271 @@
+/* ===== ENCABEZADO ===== */
+.usuarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.usuarios-titulo {
+  margin: 0;
+  color: #1e3a5f;
+}
+
+.usuarios-btn-nuevo {
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===== TABLA ===== */
+.usuarios-tabla-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.usuarios-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.usuarios-thead-tr {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+.usuarios-th {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.usuarios-tr-par {
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-tr-impar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-td-nombre {
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.usuarios-td-email {
+  padding: 10px 14px;
+}
+
+.usuarios-td-rol {
+  padding: 10px 14px;
+}
+
+.usuarios-rol-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.usuarios-rol-admin {
+  background: #d4edda;
+  color: #155724;
+}
+
+.usuarios-rol-vendedor {
+  background: #e2e3e5;
+  color: #333;
+}
+
+.usuarios-td-acceso {
+  padding: 10px 14px;
+}
+
+.usuarios-td-estado {
+  padding: 10px 14px;
+}
+
+.usuarios-estado-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.usuarios-estado-activo {
+  background: #d4edda;
+  color: #155724;
+}
+
+.usuarios-estado-inactivo {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.usuarios-td-registro {
+  padding: 10px 14px;
+  font-size: 12px;
+}
+
+.usuarios-td-acciones {
+  padding: 10px 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.usuarios-btn-editar {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.usuarios-btn-desactivar {
+  background: #d4071b;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.usuarios-btn-activar {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ===== MODAL ===== */
+.usuarios-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.usuarios-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  width: 420px;
+}
+
+.usuarios-modal-titulo {
+  margin-top: 0;
+  color: #1e3a5f;
+}
+
+.usuarios-modal-error {
+  background: #fee;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  color: #c00;
+}
+
+.usuarios-form-group {
+  margin-bottom: 14px;
+}
+
+.usuarios-form-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usuarios-form-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.usuarios-form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.usuarios-form-checkbox {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.usuarios-form-checkbox label {
+  font-size: 14px;
+}
+
+.usuarios-modal-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.usuarios-btn-cancelar {
+  padding: 9px 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.usuarios-btn-guardar {
+  padding: 9px 20px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .usuarios-tabla { font-size: 13px; }
+  .usuarios-th, .usuarios-td-nombre, .usuarios-td-email, .usuarios-td-rol,
+  .usuarios-td-acceso, .usuarios-td-estado, .usuarios-td-registro,
+  .usuarios-td-acciones { padding: 8px 10px; }
+}
+
+@media (max-width: 600px) {
+  .usuarios-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .usuarios-titulo { font-size: 20px; }
+  .usuarios-btn-nuevo { padding: 10px 16px; font-size: 14px; white-space: nowrap; }
+  .usuarios-tabla-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .usuarios-tabla { min-width: 550px; font-size: 12px; }
+  .usuarios-th { font-size: 11px; padding: 8px 6px; }
+  .usuarios-td-nombre, .usuarios-td-email, .usuarios-td-rol,
+  .usuarios-td-acceso, .usuarios-td-estado, .usuarios-td-registro { padding: 8px 6px; font-size: 12px; }
+  .usuarios-td-acciones { gap: 4px; padding: 6px 5px; }
+  .usuarios-btn-editar, .usuarios-btn-desactivar, .usuarios-btn-activar { padding: 6px 8px; min-width: 30px; }
+  .usuarios-modal { width: 95%; padding: 24px; }
+  .usuarios-modal-titulo { font-size: 17px; }
+  .usuarios-form-input, .usuarios-form-select { font-size: 14px; padding: 10px; }
+  .usuarios-modal-botones { flex-direction: row; gap: 10px; }
+  .usuarios-btn-cancelar, .usuarios-btn-guardar { flex: 1; text-align: center; padding: 12px; font-size: 14px; }
+}

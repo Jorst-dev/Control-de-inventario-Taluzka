@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import { Pencil, ArrowRightLeft, ToggleLeft, ToggleRight } from "lucide-react"
-
+import { Pencil, ArrowRightLeft, ToggleLeft, ToggleRight, Download } from 'lucide-react'
+import * as XLSX from 'xlsx'
+import './Productos.css'
 
 const FORM_VACIO = {
-  nombre: '', id_categoria: '', descripcion: '',
+  nombre: '', id_categoria: '', descripcion: '\n - Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',
   precio_compra: '', precio: '', tipo_control: 'unidad',
   stock_inicial: 0, stock_minimo: 5,
   nivel_estado: 'LLENO',
@@ -13,23 +14,26 @@ const FORM_VACIO = {
 
 export default function Productos() {
   const navigate = useNavigate()
-  const [productos,   setProductos]  = useState([])
-
-  const [categorias,  setCategorias] = useState([])
-  const [modal,       setModal]      = useState(false)
-  const [form,        setForm]       = useState(FORM_VACIO)
-  const [editId,      setEditId]     = useState(null)
-  const [error,       setError]      = useState('')
-  const [buscar,      setBuscar]     = useState('')
-  
-  const [filtroCat,  setFiltroCat]  = useState('')
+  const [productos, setProductos] = useState([])
+  const [categorias, setCategorias] = useState([])
+  const [modal, setModal] = useState(false)
+  const [form, setForm] = useState(FORM_VACIO)
+  const [editId, setEditId] = useState(null)
+  const [error, setError] = useState('')
+  const [buscar, setBuscar] = useState('')
+  const [filtroCat, setFiltroCat] = useState('')
   const [filtroTipo, setFiltroTipo] = useState('')
-  const [verDesc, setVerDesc] = useState(null) // guarda el producto seleccionado
+  const [verDesc, setVerDesc] = useState(null)
+
   const cargar = () => {
     api.get('/productos/').then(r => setProductos(r.data))
     api.get('/categorias/?activas=true').then(r => setCategorias(r.data))
   }
-  useEffect(cargar, [])
+  useEffect(() => {
+    cargar()
+    window.addEventListener('focus', cargar)
+    return () => window.removeEventListener('focus', cargar)
+  }, [])
 
   const abrirCrear = () => { setForm(FORM_VACIO); setEditId(null); setError(''); setModal(true) }
   const abrirEditar = (p) => {
@@ -59,345 +63,269 @@ export default function Productos() {
   }
 
   const cambiarEstado = async (id, nuevoEstado) => {
-  const mensaje = nuevoEstado ? '¿Activar este producto?' : '¿Desactivar este producto?'
-  if (!confirm(mensaje)) return
-  await api.put(`/productos/${id}`, { estado: nuevoEstado })
-  cargar()
-}
+    const mensaje = nuevoEstado ? '¿Activar este producto?' : '¿Desactivar este producto?'
+    if (!confirm(mensaje)) return
+    await api.put(`/productos/${id}`, { estado: nuevoEstado })
+    cargar()
+  }
 
   const filtrados = productos.filter(p => {
-  const matchNombre = p.nombre.toLowerCase().includes(buscar.toLowerCase())
-  const matchCat    = filtroCat  ? String(p.id_categoria) === filtroCat : true
-  const matchTipo   = filtroTipo ? p.tipo_control === filtroTipo : true
-  return matchNombre && matchCat && matchTipo
-})
+    const matchNombre = p.nombre.toLowerCase().includes(buscar.toLowerCase())
+    const matchCat = filtroCat ? String(p.id_categoria) === filtroCat : true
+    const matchTipo = filtroTipo ? p.tipo_control === filtroTipo : true
+    return matchNombre && matchCat && matchTipo
+  })
 
   const ganancia = (p) => (parseFloat(p.precio) - parseFloat(p.precio_compra)).toFixed(2)
-  const margen   = (p) => {
+  const margen = (p) => {
     const pc = parseFloat(p.precio_compra)
     if (!pc) return '0%'
     return ((parseFloat(p.precio) - pc) / pc * 100).toFixed(1) + '%'
   }
-  
+
+  const exportarExcel = () => {
+    const datos = filtrados.map(p => ({
+      Nombre: p.nombre,
+      'P. Compra': parseFloat(p.precio_compra).toFixed(2),
+      'P. Venta': parseFloat(p.precio).toFixed(2),
+      Ganancia: ganancia(p),
+      Stock: p.tipo_control === 'nivel'
+        ? (p.nivel_estado === 'LLENO' ? 'LLENO' : p.nivel_estado === 'MEDIO' ? 'MEDIO' : 'BAJO')
+        : p.stock_actual,
+      Tipo: p.tipo_control === 'unidad' ? 'Unidad' : p.tipo_control === 'caja' ? 'Caja' : 'Nivel',
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(datos)
+    
+
+    ws['!cols'] = [
+      { wch: 30 },  // Nombre
+      { wch: 12 },  // P. Compra
+      { wch: 12 },  // P. Venta
+      { wch: 12 },  // Ganancia
+      { wch: 10 },  // Stock
+      { wch: 10 },  // Tipo
+    ]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Productos')
+    XLSX.writeFile(wb, 'productos.xlsx')
+  }
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ margin: 0, color: '#1e3a5f' }}>Productos</h1>
-        <button onClick={abrirCrear}
-          style={{ background: '#1e3a5f', color: '#fff', border: 'none',
-            padding: '10px 20px', borderRadius: 4, cursor: 'pointer' }}>
-          + Nuevo Producto
+      <div className="productos-header">
+      <h1 className="productos-titulo">Productos</h1>
+      <div className="productos-header-botones">
+        <button onClick={exportarExcel} className="productos-btn-exportar" title="Exportar a Excel">
+          <Download size={16} />
+          <span>Excel</span>
         </button>
+        <button onClick={abrirCrear} className="productos-btn-nuevo">+ Nuevo Producto</button>
       </div>
+    </div>
 
       <input
         placeholder="Buscar producto..."
         value={buscar} onChange={e => setBuscar(e.target.value)}
-        style={{ width: '100%', padding: '10px 14px', border: '1px solid #ddd',
-          borderRadius: 4, marginBottom: 16, fontSize: 14, boxSizing: 'border-box' }}
-        
+        className="productos-buscador"
       />
 
-        <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-      <select value={filtroCat} onChange={e => setFiltroCat(e.target.value)}
-        style={{ flex: 1, padding: '10px 14px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}>
-        <option value="">Todas las categorías</option>
-        {categorias.map(c => (
-          <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>
-        ))}
-      </select>
+      <div className="productos-filtros">
+        <select value={filtroCat} onChange={e => setFiltroCat(e.target.value)} className="productos-filtro-select">
+          <option value="">Todas las categorías</option>
+          {categorias.map(c => (
+            <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>
+          ))}
+        </select>
+        <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} className="productos-filtro-select">
+          <option value="">Todos los tipos</option>
+          <option value="unidad">Unidades</option>
+          <option value="caja">Cajones</option>
+          <option value="nivel">Por Nivel</option>
+        </select>
+      </div>
 
-      <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}
-        style={{ flex: 1, padding: '10px 14px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}>
-        <option value="">Todos los tipos</option>
-        <option value="unidad">Unidades</option>
-        <option value="caja">Cajones</option>
-        <option value="nivel">Por Nivel</option>
-      </select>
-    </div>
-
-
-      <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+      <div className="productos-tabla-container">
+        <table className="productos-tabla">
           <thead>
-            <tr style={{ background: '#1e3a5f', color: '#fff' }}>
-              {['','Nombre','Categoría','P. Compra','P. Venta','Ganancia','Margen','Stock Actual','Acciones'].map(h => (
-                <th key={h} style={{ padding: '12px 14px', textAlign: 'left' }}>{h}</th>
+            <tr className="productos-thead-tr">
+              {['', 'Nombre', 'Categoría', 'P. Compra', 'P. Venta', 'Ganancia', 'Margen', 'Stock Actual', 'Acciones'].map(h => (
+                <th key={h} className="productos-th">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtrados.map((p, i) => (
-              <tr key={p.id_producto} style={{ background: i % 2 === 0 ? '#f9f9f9' : '#fff', borderBottom: '1px solid #eee' }}>
-                
-                <td style={{ padding: '1px 1px', textAlign: 'center', width: 36 }}>
+              <tr key={p.id_producto} className={i % 2 === 0 ? 'productos-tr-par' : 'productos-tr-impar'}>
+                <td className="productos-td-ojo">
                   {p.descripcion && (
-                    <span
-                      onClick={() => setVerDesc(p)}
-                      title="Ver descripción"
-                      style={{ cursor: 'pointer', fontSize: 16 }}>
-                      👁️
-                    </span>
+                    <span onClick={() => setVerDesc(p)} title="Ver descripción" className="productos-ojo-icono">👁️</span>
                   )}
                 </td>
-
-                <td style={{ padding: '10px 14px', fontWeight: 600 }}>{p.nombre}</td>
-                <td style={{ padding: '10px 14px' }}>{p.categoria}</td>
-                <td style={{ padding: '10px 14px' }}>S/. {parseFloat(p.precio_compra).toFixed(2)}</td>
-                <td style={{ padding: '10px 14px' }}>S/. {parseFloat(p.precio).toFixed(2)}</td>
-                <td style={{ padding: '10px 14px', color: '#28a745' }}>S/. {ganancia(p)}</td>
-                <td style={{ padding: '10px 14px' }}>{margen(p)}</td>
-                <td style={{
-                  padding: '10px 14px',
-                  fontWeight: 700,
+                <td className="productos-td-nombre">{p.nombre}</td>
+                <td className="productos-td-categoria">{p.categoria}</td>
+                <td className="productos-td-precio">S/. {parseFloat(p.precio_compra).toFixed(2)}</td>
+                <td className="productos-td-precio">S/. {parseFloat(p.precio).toFixed(2)}</td>
+                <td className="productos-td-ganancia">S/. {ganancia(p)}</td>
+                <td className="productos-td-margen">{margen(p)}</td>
+                <td className="productos-td-stock" style={{
                   color: p.tipo_control === 'nivel' ? '#333' :
-                        p.stock_actual <= 0 ? '#dc3545' :
-                        p.stock_actual <= p.stock_minimo ? '#fd7e14' : '#28a745'
+                    p.stock_actual <= 0 ? '#dc3545' :
+                    p.stock_actual <= p.stock_minimo ? '#fd7e14' : '#28a745'
                 }}>
                   {p.tipo_control === 'nivel'
-                    ? <span style={{
-                        background: p.nivel_estado === 'LLENO' ? '#d4edda' :
-                                    p.nivel_estado === 'MEDIO' ? '#fff3cd' : '#f8d7da',
-                        color: p.nivel_estado === 'LLENO' ? '#155724' :
-                              p.nivel_estado === 'MEDIO' ? '#856404' : '#721c24',
-                        padding: '3px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600
-                      }}>
+                    ? <span className={`productos-nivel-badge productos-nivel-${p.nivel_estado?.toLowerCase()}`}>
                         {p.nivel_estado === 'LLENO' ? '🟢 LLENO' :
-                        p.nivel_estado === 'MEDIO' ? '🟡 MEDIO' : '🔴 BAJO'}
+                         p.nivel_estado === 'MEDIO' ? '🟡 MEDIO' : '🔴 BAJO'}
                       </span>
                     : p.stock_actual
                   }
                 </td>
-
-                
-
-                <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
-
-
-                  <button onClick={() => abrirEditar(p)}
-                    style={{ background: '#28a745', color: '#fff', border: 'none',
-                      padding: '5px 12px', borderRadius: 4, cursor: 'pointer' }}
-                      title="Editar"
-                      >
+                <td className="productos-td-acciones">
+                  <button onClick={() => abrirEditar(p)} className="productos-btn-editar" title="Editar">
                     <Pencil size={15} />
                   </button>
-
-
                   {p.tipo_control !== 'nivel' && (
                     <button
                       onClick={() => navigate(`/movimientos?id_producto=${p.id_producto}&nombre=${encodeURIComponent(p.nombre)}`)}
-                      style={{ background: '#013fe9', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer'}}
-                     title="Movimientos"
-                    >
+                      className="productos-btn-movimientos" title="Movimientos">
                       <ArrowRightLeft size={15} />
                     </button>
                   )}
                   {p.estado === true || p.estado === 1 ? (
-                    <button onClick={() => cambiarEstado(p.id_producto, false)}
-                      style={{ background: '#d4071b', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
-
-                        title="Desactivar"
-                        >
-                          <ToggleRight size={15} />
+                    <button onClick={() => cambiarEstado(p.id_producto, false)} className="productos-btn-desactivar" title="Desactivar">
+                      <ToggleRight size={15} />
                     </button>
                   ) : (
-                    <button onClick={() => cambiarEstado(p.id_producto, true)}
-                      style={{ background: '#28a745', color: '#fff', border: 'none',
-                        padding: '5px 12px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
-
-                        title="Activar"
-                        >
-                          <ToggleLeft size={15} />
+                    <button onClick={() => cambiarEstado(p.id_producto, true)} className="productos-btn-activar" title="Activar">
+                      <ToggleLeft size={15} />
                     </button>
                   )}
                 </td>
-
               </tr>
             ))}
             {filtrados.length === 0 && (
-              <tr><td colSpan={9} style={{ padding: 20, textAlign: 'center', color: '#999' }}>Sin productos</td></tr>
+              <tr><td colSpan={9} className="productos-sin-datos">Sin productos</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-
-            
-
-
       {/* Modal */}
       {modal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', borderRadius: 8, padding: 32, width: 500, maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 style={{ marginTop: 0, color: '#1e3a5f' }}>{editId ? 'Editar' : 'Nuevo'} Producto</h2>
-            {error && <div style={{ background: '#fee', padding: 10, borderRadius: 4, marginBottom: 12, color: '#c00' }}>{error}</div>}
+        <div className="productos-modal-overlay">
+          <div className="productos-modal">
+            <h2 className="productos-modal-titulo">{editId ? 'Editar' : 'Nuevo'} Producto</h2>
+            {error && <div className="productos-modal-error">{error}</div>}
             <form onSubmit={guardar}>
               {[
                 { label: 'Nombre', key: 'nombre', type: 'text', required: true },
-                
                 { label: 'Precio de Compra (S/.)', key: 'precio_compra', type: 'number', step: '0.01', required: true },
                 { label: 'Precio de Venta (S/.)', key: 'precio', type: 'number', step: '0.01', required: true },
               ].map(f => (
-                <div key={f.key} style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>{f.label}</label>
+                <div key={f.key} className="productos-form-group">
+                  <label className="productos-form-label">{f.label}</label>
                   <input type={f.type} step={f.step} required={f.required}
                     value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd',
-                      borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }}
+                    className="productos-form-input"
                   />
                 </div>
               ))}
 
-              {/* Descripción como textarea */}
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Descripción</label>
-                <textarea
-                  value={form.descripcion}
-                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                  rows={3}
-                  
-                  style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd',
-                    borderRadius: 4, fontSize: 14, boxSizing: 'border-box', resize: 'vertical' }}
-                />
+              <div className="productos-form-group">
+                <label className="productos-form-label">Descripción</label>
+                <textarea value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                  rows={5} className="productos-form-textarea" />
               </div>
 
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Categoría</label>
+              <div className="productos-form-group">
+                <label className="productos-form-label">Categoría</label>
                 <select required value={form.id_categoria}
                   onChange={e => setForm({ ...form, id_categoria: e.target.value })}
-                  style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}>
+                  className="productos-form-select">
                   <option value="">Seleccionar categoría</option>
                   {categorias.map(c => <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>)}
                 </select>
               </div>
 
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Tipo de Control</label>
+              <div className="productos-form-group">
+                <label className="productos-form-label">Tipo de Control</label>
                 <select value={form.tipo_control}
                   onChange={e => setForm({ ...form, tipo_control: e.target.value })}
-                  style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}>
+                  className="productos-form-select">
                   <option value="unidad">Unidad</option>
                   <option value="caja">Caja</option>
-                   <option value="nivel">Por Nivel (Verde / Amarillo / Rojo)</option>
+                  <option value="nivel">Por Nivel (Verde / Amarillo / Rojo)</option>
                 </select>
               </div>
 
-              {/* Si tipo nivel: mostrar selector de color, en crear Y editar */}
-                {form.tipo_control === 'nivel' && (
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>
-                      Estado de Nivel
-                    </label>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      {[
-                        { valor: 'LLENO', label: 'LLENO',  bg: '#d4edda', color: '#155724', borde: '#28a745' },
-                        { valor: 'MEDIO', label: 'MEDIO',  bg: '#fff3cd', color: '#856404', borde: '#e6a817' },
-                        { valor: 'BAJO',  label: 'BAJO',   bg: '#f8d7da', color: '#721c24', borde: '#dc3545' },
-                      ].map(n => (
-                        <button
-                          key={n.valor}
-                          type="button"
-                          onClick={() => setForm({ ...form, nivel_estado: n.valor })}
-                          style={{
-                            flex: 1,
-                            padding: '12px 6px',
-                            border: `2px solid ${form.nivel_estado === n.valor ? n.borde : '#ddd'}`,
-                            background: form.nivel_estado === n.valor ? n.bg : '#fff',
-                            borderRadius: 6,
-                            cursor: 'pointer',
-                            fontWeight: form.nivel_estado === n.valor ? 700 : 400,
-                            fontSize: 13,
-                            color: form.nivel_estado === n.valor ? n.color : '#aaa',
-                            transition: 'all .15s',
-                          }}
-                        >
-                          {n.valor === 'LLENO' ? '🟢' : n.valor === 'MEDIO' ? '🟡' : '🔴'} {n.label}
-                        </button>
-                      ))}
-                    </div>
+              {form.tipo_control === 'nivel' && (
+                <div className="productos-form-group">
+                  <label className="productos-form-label">Estado de Nivel</label>
+                  <div className="productos-nivel-selector">
+                    {[
+                      { valor: 'LLENO', label: 'LLENO', bg: '#d4edda', color: '#155724', borde: '#28a745' },
+                      { valor: 'MEDIO', label: 'MEDIO', bg: '#fff3cd', color: '#856404', borde: '#e6a817' },
+                      { valor: 'BAJO', label: 'BAJO', bg: '#f8d7da', color: '#721c24', borde: '#dc3545' },
+                    ].map(n => (
+                      <button
+                        key={n.valor}
+                        type="button"
+                        onClick={() => setForm({ ...form, nivel_estado: n.valor })}
+                        className={`productos-nivel-btn ${form.nivel_estado === n.valor ? 'seleccionado' : ''}`}
+                        style={{
+                          borderColor: form.nivel_estado === n.valor ? n.borde : '#ddd',
+                          background: form.nivel_estado === n.valor ? n.bg : '#fff',
+                          color: form.nivel_estado === n.valor ? n.color : '#aaa',
+                        }}
+                      >
+                        {n.valor === 'LLENO' ? '🟢' : n.valor === 'MEDIO' ? '🟡' : '🔴'} {n.label}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
-              {/* Si tipo unidad o caja: mostrar stock (solo al crear) */}
               {form.tipo_control !== 'nivel' && (
                 <>
                   {!editId && (
-                    <div style={{ marginBottom: 14 }}>
-                      <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Inicial</label>
+                    <div className="productos-form-group">
+                      <label className="productos-form-label">Stock Inicial</label>
                       <input type="number" min="0" value={form.stock_inicial}
                         onChange={e => setForm({ ...form, stock_inicial: parseInt(e.target.value) })}
-                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
+                        className="productos-form-input" />
                     </div>
                   )}
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600 }}>Stock Mínimo</label>
+                  <div className="productos-form-group">
+                    <label className="productos-form-label">Stock Mínimo</label>
                     <input type="number" min="0" value={form.stock_minimo}
                       onChange={e => setForm({ ...form, stock_minimo: parseInt(e.target.value) })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' }} />
+                      className="productos-form-input" />
                   </div>
                 </>
               )}
 
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-                <button type="button" onClick={() => setModal(false)}
-                  style={{ padding: '9px 20px', border: '1px solid #ddd', background: '#fff', borderRadius: 4, cursor: 'pointer' }}>
-                  Cancelar
-                </button>
-                <button type="submit"
-                  style={{ padding: '9px 20px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
-                  {editId ? 'Guardar Cambios' : 'Crear Producto'}
-                </button>
+              <div className="productos-modal-botones">
+                <button type="button" onClick={() => setModal(false)} className="productos-btn-cancelar">Cancelar</button>
+                <button type="submit" className="productos-btn-guardar">{editId ? 'Guardar Cambios' : 'Crear Producto'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-
       {/* Mini modal descripción */}
       {verDesc && (
-        <div
-          onClick={() => setVerDesc(null)}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 2000,
-          }}>
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: '#fff', borderRadius: 8,
-              padding: 24, width: 340,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-            }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center', marginBottom: 12 }}>
-              <strong style={{ color: '#1e3a5f', fontSize: 15 }}>
-                {verDesc.nombre}
-              </strong>
-              <span
-                onClick={() => setVerDesc(null)}
-                style={{ cursor: 'pointer', fontSize: 18, color: '#aaa',
-                  lineHeight: 1, padding: '0 4px' }}>
-                ✕
-              </span>
+        <div onClick={() => setVerDesc(null)} className="productos-desc-overlay">
+          <div onClick={e => e.stopPropagation()} className="productos-desc-modal">
+            <div className="productos-desc-header">
+              <strong className="productos-desc-titulo">{verDesc.nombre}</strong>
+              <span onClick={() => setVerDesc(null)} className="productos-desc-cerrar">✕</span>
             </div>
-            <pre style={{
-              margin: 0, fontSize: 13, color: '#444',
-              whiteSpace: 'pre-wrap', fontFamily: 'inherit',
-              lineHeight: 1.6,
-            }}>
-              {verDesc.descripcion || 'Sin descripción'}
-            </pre>
+            <pre className="productos-desc-texto">{verDesc.descripcion || 'Sin descripción'}</pre>
           </div>
         </div>
       )}
-
-
     </div>
   )
 }

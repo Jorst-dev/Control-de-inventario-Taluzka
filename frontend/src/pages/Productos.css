@@ -1,0 +1,611 @@
+/* ===== ENCABEZADO ===== */
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.productos-titulo {
+  margin: 0;
+  color: #1e3a5f;
+}
+
+.productos-btn-nuevo {
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===== BUSCADOR Y FILTROS ===== */
+.productos-buscador {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.productos-filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.productos-filtro-select {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ===== TABLA ===== */
+.productos-tabla-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: auto;
+}
+
+.productos-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.productos-thead-tr {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+.productos-th {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.productos-tr-par {
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.productos-tr-impar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.productos-td-ojo {
+  padding: 1px 1px;
+  text-align: center;
+  width: 36px;
+}
+
+.productos-ojo-icono {
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.productos-td-nombre {
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.productos-td-categoria {
+  padding: 10px 14px;
+}
+
+.productos-td-precio {
+  padding: 10px 14px;
+}
+
+.productos-td-ganancia {
+  padding: 10px 14px;
+  color: #28a745;
+}
+
+.productos-td-margen {
+  padding: 10px 14px;
+}
+
+.productos-td-stock {
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.productos-nivel-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.productos-nivel-lleno {
+  background: #d4edda;
+  color: #155724;
+}
+
+.productos-nivel-medio {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.productos-nivel-bajo {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.productos-td-acciones {
+  padding: 10px 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.productos-btn-editar {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.productos-btn-movimientos {
+  background: #013fe9;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.productos-btn-desactivar {
+  background: #d4071b;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.productos-btn-activar {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.productos-sin-datos {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+/* ===== MODAL ===== */
+.productos-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.productos-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.productos-modal-titulo {
+  margin-top: 0;
+  color: #1e3a5f;
+}
+
+.productos-modal-error {
+  background: #fee;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  color: #c00;
+}
+
+.productos-form-group {
+  margin-bottom: 14px;
+}
+
+.productos-form-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.productos-form-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.productos-form-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.productos-form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ===== SELECTOR DE NIVEL ===== */
+.productos-nivel-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.productos-nivel-btn {
+  flex: 1;
+  padding: 12px 6px;
+  border: 2px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 13px;
+  color: #aaa;
+  transition: all .15s;
+}
+
+.productos-nivel-btn.seleccionado {
+  font-weight: 700;
+}
+
+.productos-modal-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.productos-btn-cancelar {
+  padding: 9px 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.productos-btn-guardar {
+  padding: 9px 20px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===== MINI MODAL DESCRIPCIÓN ===== */
+.productos-desc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.productos-desc-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 340px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.productos-desc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.productos-desc-titulo {
+  color: #1e3a5f;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.productos-desc-cerrar {
+  cursor: pointer;
+  font-size: 18px;
+  color: #aaa;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.productos-desc-texto {
+  margin: 0;
+  font-size: 13px;
+  color: #444;
+  white-space: pre-wrap;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .productos-tabla {
+    font-size: 12px;
+    min-width: 850px;
+  }
+
+  .productos-th,
+  .productos-td-nombre,
+  .productos-td-categoria,
+  .productos-td-precio,
+  .productos-td-ganancia,
+  .productos-td-margen,
+  .productos-td-stock,
+  .productos-td-acciones {
+    padding: 8px 6px;
+  }
+
+  .productos-td-acciones {
+    gap: 4px;
+  }
+
+  .productos-btn-editar,
+  .productos-btn-movimientos,
+  .productos-btn-desactivar,
+  .productos-btn-activar {
+    padding: 6px 10px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .productos-tabla {
+    font-size: 12px;
+    min-width: 850px;
+  }
+
+  .productos-th,
+  .productos-td-nombre,
+  .productos-td-categoria,
+  .productos-td-precio,
+  .productos-td-ganancia,
+  .productos-td-margen,
+  .productos-td-stock,
+  .productos-td-acciones {
+    padding: 8px 6px;
+  }
+
+  .productos-td-acciones {
+    gap: 4px;
+  }
+
+  .productos-btn-editar,
+  .productos-btn-movimientos,
+  .productos-btn-desactivar,
+  .productos-btn-activar {
+    padding: 6px 10px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Celular (incluye Redmi Note 9 - 393px de ancho) */
+@media (max-width: 600px) {
+  /* Header: 2 columnas */
+  .productos-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .productos-titulo {
+    font-size: 20px;
+    flex: 1;
+  }
+
+  .productos-btn-nuevo {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Buscador */
+  .productos-buscador {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  /* Filtros SIEMPRE en 2 columnas */
+  .productos-filtros {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .productos-filtro-select {
+    width: 100%;
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  /* Tabla con scroll */
+  .productos-tabla-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .productos-tabla {
+    min-width: 700px;
+    font-size: 12px;
+  }
+
+  .productos-th {
+    font-size: 11px;
+    padding: 8px 6px;
+  }
+
+  .productos-td-nombre,
+  .productos-td-categoria,
+  .productos-td-precio,
+  .productos-td-ganancia,
+  .productos-td-margen,
+  .productos-td-stock {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  /* Acciones compactas */
+  .productos-td-acciones {
+    gap: 4px;
+    padding: 6px 5px;
+  }
+
+  .productos-btn-editar,
+  .productos-btn-movimientos,
+  .productos-btn-desactivar,
+  .productos-btn-activar {
+    padding: 6px 8px;
+    min-width: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal */
+  .productos-modal {
+    width: 95%;
+    padding: 24px;
+    max-height: 95vh;
+    border-radius: 10px;
+  }
+
+  .productos-modal-titulo {
+    font-size: 17px;
+  }
+
+  .productos-form-input,
+  .productos-form-select,
+  .productos-form-textarea {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .productos-nivel-selector {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .productos-nivel-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .productos-desc-modal {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .productos-desc-titulo {
+    font-size: 15px;
+  }
+
+  .productos-desc-texto {
+    font-size: 13px;
+  }
+
+  .productos-modal-botones {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .productos-btn-cancelar,
+  .productos-btn-guardar {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+/* ===== BOTONES DEL HEADER ===== */
+.productos-header-botones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.productos-btn-exportar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.productos-btn-exportar:hover {
+  background: #218838;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .productos-header-botones {
+    gap: 6px;
+  }
+
+  .productos-btn-exportar {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .productos-btn-exportar span {
+    display: none;
+  }
+}

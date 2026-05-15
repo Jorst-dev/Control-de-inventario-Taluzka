@@ -1,76 +1,114 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import api from '../services/api'
+import {
+  LayoutDashboard, Package, Tags, ArrowLeftRight, Bell, Users,
+  LogOut, ChevronLeft, ChevronRight, Menu, X
+} from 'lucide-react'
+import './Layout.css'
 
 export default function Layout() {
   const { usuario, logout } = useAuth()
   const navigate = useNavigate()
   const [alertasPendientes, setAlertasPendientes] = useState(0)
+  const [collapsed, setCollapsed] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const sidebarRef = useRef(null)
 
   useEffect(() => {
-    api.get('/alertas/pendientes/count')
-      .then(res => setAlertasPendientes(res.data.pendientes))
-      .catch(() => {})
-    // Revisar alertas cada 60 segundos
-    const interval = setInterval(() => {
+    const cargarAlertas = () => {
       api.get('/alertas/pendientes/count')
         .then(res => setAlertasPendientes(res.data.pendientes))
         .catch(() => {})
-    }, 60000)
-    return () => clearInterval(interval)
+    }
+    
+    cargarAlertas()
+    
+    // Actualizar cada 60 segundos
+    const interval = setInterval(cargarAlertas, 1000)
+    
+    // Actualizar al volver a la pestaña
+    window.addEventListener('focus', cargarAlertas)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', cargarAlertas)
+    }
   }, [])
 
   const handleLogout = () => { logout(); navigate('/login') }
 
+  const toggleSidebar = () => setCollapsed(prev => !prev)
+  const toggleMobile = () => setMobileOpen(prev => !prev)
+
+  // Abrir al pasar el mouse, cerrar al quitarlo
+  const handleMouseEnter = () => { if (collapsed) setCollapsed(false) }
+  const handleMouseLeave = () => { if (!mobileOpen) setCollapsed(true) }
+
   const links = [
-    { to: '/',            label: 'Dashboard' },
-    { to: '/productos',   label: 'Productos' },
-    { to: '/categorias',  label: 'Categorías' },
-    { to: '/movimientos', label: 'Movimientos' },
-    { to: '/alertas',     label: `Alertas${alertasPendientes > 0 ? ` (${alertasPendientes})` : ''}` },
-    ...(usuario?.rol === 'admin' ? [{ to: '/usuarios', label: 'Usuarios' }] : []),
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/productos', label: 'Productos', icon: Package },
+    { to: '/categorias', label: 'Categorías', icon: Tags },
+    { to: '/movimientos', label: 'Movimientos', icon: ArrowLeftRight },
+    { to: '/alertas', label: `Alertas${alertasPendientes > 0 ? ` ${alertasPendientes}` : ''}`, icon: Bell },
+
+    ...(usuario?.rol === 'admin' ? [{ to: '/usuarios', label: 'Usuarios', icon: Users }] : []),
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+    <div className="layout-container">
+      {/* Overlay móvil */}
+      <div className={`sidebar-overlay ${mobileOpen ? 'visible' : ''}`} onClick={toggleMobile} />
+
+      {/* Botón hamburguesa móvil */}
+      <button className="mobile-hamburger" onClick={toggleMobile}>
+        {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
       {/* Sidebar */}
-      <nav style={{ width: 220, background: '#1e3a5f', color: '#fff', padding: '20px 0' }}>
-        <div style={{ padding: '0 20px 20px', borderBottom: '1px solid #2d5a8e' }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>Ferretería Taluzka</h2>
-          <small style={{ opacity: 0.7 }}>{usuario?.nombre}</small>
+      <nav
+        ref={sidebarRef}
+        className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Botón colapsar */}
+        <button className="sidebar-toggle" onClick={toggleSidebar} title={collapsed ? 'Expandir menú' : 'Colapsar menú'}>
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+
+        <div className="sidebar-header">
+          <h2 className="sidebar-titulo">Ferretería Taluzka</h2>
+          <small className="sidebar-usuario">{usuario?.nombre}</small>
         </div>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+
+        <ul className="sidebar-menu">
           {links.map(l => (
             <li key={l.to}>
               <NavLink
                 to={l.to}
                 end={l.to === '/'}
-                style={({ isActive }) => ({
-                  display: 'block', padding: '12px 20px',
-                  color: isActive ? '#fff' : '#a8c4e0',
-                  background: isActive ? '#2d5a8e' : 'transparent',
-                  textDecoration: 'none', fontSize: 14,
-                })}
+                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                onClick={() => setMobileOpen(false)}
               >
-                {l.label}
+                <l.icon size={18} className="icon" />
+                <span className="label">{l.label}</span>
               </NavLink>
             </li>
           ))}
         </ul>
-        <div style={{ position: 'absolute', bottom: 20, left: 0, width: 220 }}>
-          <button
-            onClick={handleLogout}
-            style={{ width: '100%', padding: '12px 20px', background: 'none',
-              border: 'none', color: '#a8c4e0', cursor: 'pointer', textAlign: 'left', fontSize: 14 }}
-          >
-            Cerrar sesión
+
+        <div className="sidebar-logout">
+          <button onClick={handleLogout} className="sidebar-logout-btn">
+            <LogOut size={18} className="icon" />
+            <span className="label">Cerrar sesión</span>
           </button>
         </div>
       </nav>
 
       {/* Contenido */}
-      <main style={{ flex: 1, padding: 30, background: '#f4f6f9', overflowY: 'auto' }}>
+      <main className="layout-main">
         <Outlet />
       </main>
     </div>

@@ -1,0 +1,155 @@
+/* ===== COLORES DE ESTADO ===== */
+.estado-pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.estado-en_proceso {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.estado-recibido {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-ignorada {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+/* ===== TÍTULO ===== */
+.alertas-titulo {
+  margin-top: 0;
+  color: #1e3a5f;
+}
+
+/* ===== SELECT ===== */
+.alertas-select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ===== TABLA ===== */
+.alertas-tabla-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: auto;
+}
+
+.alertas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.alertas-thead-tr {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+.alertas-th {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.alertas-tr-par {
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.alertas-tr-impar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.alertas-td-producto {
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.alertas-td-stock {
+  padding: 10px 14px;
+  font-weight: 700;
+  color: #dc3545;
+  font-size: 16px;
+}
+
+.alertas-td-estado {
+  padding: 10px 14px;
+}
+
+.alertas-estado-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.alertas-td-fecha {
+  padding: 10px 14px;
+  font-size: 12px;
+}
+
+.alertas-td-acciones {
+  padding: 10px 14px;
+}
+
+.alertas-acciones-container {
+  display: flex;
+  gap: 6px;
+}
+
+/* ===== BOTONES ===== */
+.alertas-btn {
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.alertas-btn-proceso {
+  background: #004085;
+}
+
+.alertas-btn-recibido {
+  background: #28a745;
+}
+
+.alertas-btn-ignorar {
+  background: #6c757d;
+}
+
+/* ===== SIN DATOS ===== */
+.alertas-sin-datos {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .alertas-tabla { font-size: 13px; }
+  .alertas-th, .alertas-td-producto, .alertas-td-stock,
+  .alertas-td-estado, .alertas-td-fecha, .alertas-td-acciones { padding: 8px 10px; }
+}
+
+@media (max-width: 600px) {
+  .alertas-titulo { font-size: 20px; }
+  .alertas-select { width: 100%; font-size: 14px; padding: 10px 14px; }
+  .alertas-tabla-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .alertas-tabla { min-width: 550px; font-size: 12px; }
+  .alertas-th { font-size: 11px; padding: 8px 6px; }
+  .alertas-td-producto, .alertas-td-stock, .alertas-td-estado,
+  .alertas-td-fecha { padding: 8px 6px; font-size: 12px; }
+  .alertas-td-acciones { padding: 6px 5px; }
+  .alertas-acciones-container { gap: 4px; }
+  .alertas-btn { padding: 6px 10px; font-size: 11px; }
+}

@@ -14,6 +14,10 @@ from routes.productos  import productos_bp
 from routes.movimientos import movimientos_bp
 from routes.alertas    import alertas_bp
 
+import os
+import subprocess
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 
 def create_app():
     app = Flask(__name__)
@@ -47,6 +51,30 @@ def create_app():
         db.create_all()
         _crear_admin_inicial()
 
+
+    BACKUP_DIR = os.path.join(os.path.dirname(__file__), 'backups')
+
+    def hacer_backup():
+        if not os.path.exists(BACKUP_DIR):
+            os.makedirs(BACKUP_DIR)
+        
+        archivo = os.path.join(BACKUP_DIR, 'backup.sql')
+        mysqldump_path = r'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe'
+        comando = f'"{mysqldump_path}" -h {os.getenv("DB_HOST", "localhost")} -u {os.getenv("DB_USER", "root")} -p{os.getenv("DB_PASSWORD", "")} {os.getenv("DB_NAME", "ferreteria_taluzka")} > {archivo}'
+        
+        try:
+            subprocess.run(comando, shell=True, check=True)
+            print(f'✅ Backup generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+        except Exception as e:
+            print(f'❌ Error al hacer backup: {e}')
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(hacer_backup, 'interval', hours=1)
+    scheduler.start()
+
+    hacer_backup()
+
+
     return app
 
 
@@ -72,4 +100,4 @@ def _crear_admin_inicial():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True, port=5000, host='0.0.0.0')
