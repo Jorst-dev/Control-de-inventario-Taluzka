@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx'
 import './Productos.css'
 
 const FORM_VACIO = {
-  nombre: '', id_categoria: '', descripcion: '\n - Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',
+  nombre: '', id_categoria: '', descripcion: '\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',
   precio_compra: '', precio: '', tipo_control: 'unidad',
   stock_inicial: 0, stock_minimo: 5,
   nivel_estado: 'LLENO',

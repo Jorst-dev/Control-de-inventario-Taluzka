@@ -63,7 +63,7 @@ CREATE TABLE `categoria` (
   `descripcion` varchar(200) COLLATE utf8mb4_spanish_ci DEFAULT NULL,
   `estado` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_categoria`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,6 +72,7 @@ CREATE TABLE `categoria` (
 
 LOCK TABLES `categoria` WRITE;
 /*!40000 ALTER TABLE `categoria` DISABLE KEYS */;
+INSERT INTO `categoria` VALUES (1,'Pernos Expansivos T','Para las fijaciones',1),(2,'Tornillos Spack','Fijaciones en madera, melamina, etc...',1);
 /*!40000 ALTER TABLE `categoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -95,7 +96,7 @@ CREATE TABLE `control_inventario` (
   PRIMARY KEY (`id_control`),
   UNIQUE KEY `id_producto` (`id_producto`),
   CONSTRAINT `fk_control_producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,6 +105,7 @@ CREATE TABLE `control_inventario` (
 
 LOCK TABLES `control_inventario` WRITE;
 /*!40000 ALTER TABLE `control_inventario` DISABLE KEYS */;
+INSERT INTO `control_inventario` VALUES (1,1,'caja',8,4,0,0,NULL,'2026-05-15 19:11:06');
 /*!40000 ALTER TABLE `control_inventario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -159,7 +161,7 @@ CREATE TABLE `producto` (
   PRIMARY KEY (`id_producto`),
   KEY `fk_producto_categoria` (`id_categoria`),
   CONSTRAINT `fk_producto_categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categoria` (`id_categoria`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -168,6 +170,7 @@ CREATE TABLE `producto` (
 
 LOCK TABLES `producto` WRITE;
 /*!40000 ALTER TABLE `producto` DISABLE KEYS */;
+INSERT INTO `producto` VALUES (1,1,'Perno expansivo 3/8 x 3','Ubicado en\n- Marca: Torfix\n- Lo que viene: 150 en la caja\n- UND:1.5\n- DOC:12\n- %:zz\n- Millar:',22.00,43.99,'caja',1);
 /*!40000 ALTER TABLE `producto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -285,4 +288,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14 18:31:01
+-- Dump completed on 2026-05-15 14:27:46

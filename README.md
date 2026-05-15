@@ -18,7 +18,6 @@ ferreteria/
 │       ├── categorias.py
 │       ├── productos.py
 │       ├── movimientos.py
-│       ├── inventario.py
 │       └── alertas.py
 └── frontend/        ← React + Vite
     ├── package.json
@@ -35,7 +34,6 @@ ferreteria/
             ├── Dashboard.jsx
             ├── Productos.jsx
             ├── Categorias.jsx
-            ├── Inventario.jsx
             ├── Movimientos.jsx
             ├── Alertas.jsx
             └── Usuarios.jsx
@@ -107,3 +105,76 @@ npm run dev
 - **Email:** admin@ferreteria.com
 - **Contraseña:** admin123
 - Cambiar la contraseña al primer ingreso.
+
+
+
+
+1. Crear el entorno virtual (solo 1 vez)
+
+Dentro de tu backend:
+
+cd backend
+python -m venv venv
+
+Esto crea una carpeta:
+
+backend/
+  venv/
+2. Activarlo (PowerShell o CMD)
+En CMD o dentro de .bat:
+venv\Scripts\activate
+En PowerShell:
+.\venv\Scripts\Activate.ps1
+
+
+
+
+
+
+@echo off
+title Ferreteria Taluzka
+color 0A
+echo ========================================
+echo    FERRETERIA TALUZKA - Iniciando...
+echo ========================================
+echo.
+
+:: 1. Iniciar MySQL (Laragon)
+echo [1/3] Iniciando Laragon...
+start "" "C:\laragon\laragon.exe"
+timeout /t 3 /nobreak >nul
+
+:: 2. Iniciar backend Flask
+echo [2/3] Iniciando Backend...
+start "Flask" cmd /k "cd /d P:\Proyectos_Python\ferreteria\backend && venv\Scripts\activate && python app.py"
+timeout /t 2 /nobreak >nul
+
+:: 3. Iniciar frontend React
+echo [3/3] Iniciando Frontend...
+start "React" cmd /k "cd /d P:\Proyectos_Python\ferreteria\frontend && npm run dev"
+timeout /t 5 /nobreak >nul
+
+:: 4. Abrir navegador
+echo Abriendo sistema...
+start http://localhost:5173
+
+echo.
+echo ========================================
+echo    SISTEMA INICIADO - 192.168.1.103
+echo    Cierra esta ventana nomas
+echo ========================================
+pause
+
+
+
+
+
+
+Sí. Cuando clonas una rama específica, se baja el último commit de esa rama.
+
+bash
+git clone -b fix/sistema https://github.com/Jorst-dev/Control-de-inventario-Taluzka.git
+O si ya clonaste y quieres cambiar de rama:
+
+bash
+git checkout nombre-de-tu-rama
