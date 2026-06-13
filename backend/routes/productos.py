@@ -97,6 +97,7 @@ def crear_producto():
         precio_compra = data["precio_compra"],
         precio        = data["precio"],
         tipo_control  = data.get("tipo_control", "unidad"),
+        imagen        = data.get("imagen"),
     )
     db.session.add(producto)
     db.session.flush()  # Obtener id_producto antes del commit
@@ -145,6 +146,7 @@ def actualizar_producto(id):
     producto.precio        = precio
     producto.tipo_control  = data.get("tipo_control", producto.tipo_control)
     producto.estado        = data.get("estado", producto.estado)
+    producto.imagen        = data.get("imagen", producto.imagen)
 
     # Actualizar también el tipo_control del control de inventario
     if producto.control:
@@ -182,4 +184,3 @@ def eliminar_producto(id):
     producto.estado = False
     db.session.commit()
     return jsonify({"mensaje": "Producto desactivado"}), 200
-

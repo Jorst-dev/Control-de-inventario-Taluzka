@@ -1,6 +1,10 @@
 # =========================
 # PYTHON
 # =========================
+
+uploads/productos/*
+!uploads/productos/.gitkeep
+
 __pycache__/
 *.pyc
 *.pyo
@@ -23,6 +27,7 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # =========================
 # VS CODE

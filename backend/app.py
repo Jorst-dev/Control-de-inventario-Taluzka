@@ -6,13 +6,15 @@ import bcrypt
 from config.database import Config
 from models import db, Usuario
 
+
 # Rutas
 from routes.auth       import auth_bp
 from routes.usuarios   import usuarios_bp
 from routes.categorias import categorias_bp
 from routes.productos  import productos_bp
 from routes.movimientos import movimientos_bp
-from routes.alertas    import alertas_bp
+from routes.alertas     import alertas_bp
+from routes.upload      import upload_bp
 
 import os
 import subprocess
@@ -20,13 +22,19 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
     app.config.from_object(Config)
 
     # CORS: permite peticiones desde React (puerto 5173 por defecto con Vite)
     #CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}})
     CORS(app)
     db.init_app(app)
+    @app.route('/test-uploads')
+    def test_uploads():
+        import os
+        ruta = os.path.join(app.static_folder, 'productos')
+        archivos = os.listdir(ruta) if os.path.exists(ruta) else []
+        return jsonify({"static_folder": app.static_folder, "existe": os.path.exists(ruta), "archivos": archivos})
     JWTManager(app)
 
     # Registrar blueprints
@@ -36,10 +44,14 @@ def create_app():
     app.register_blueprint(productos_bp)
     app.register_blueprint(movimientos_bp)
     app.register_blueprint(alertas_bp)
+    app.register_blueprint(upload_bp)
 
     # Manejo de errores globales
     @app.errorhandler(404)
     def not_found(e):
+        from flask import request
+        if request.path.startswith('/uploads/'):
+            return e
         return jsonify({"error": "Recurso no encontrado"}), 404
 
     @app.errorhandler(500)

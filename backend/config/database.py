@@ -21,7 +21,7 @@ class Config:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "clave_por_defecto_insegura")
     JWT_TOKEN_LOCATION = ['headers']  # Busca el token en los headers HTTP
     JWT_HEADER_TYPE = 'Bearer'        # Espera el formato: Bearer <token>
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)  # Token expira en 8 horas
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=16)  # Token expira en 8 horas
     
     # Clave secreta para sesiones de Flask
     SECRET_KEY = os.getenv("SECRET_KEY", "ferreteria_secret_default")

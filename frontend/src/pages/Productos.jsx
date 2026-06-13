@@ -10,6 +10,7 @@ const FORM_VACIO = {
   precio_compra: '', precio: '', tipo_control: 'unidad',
   stock_inicial: 0, stock_minimo: 5,
   nivel_estado: 'LLENO',
+  imagen: null,
 }
 
 export default function Productos() {
@@ -24,40 +25,108 @@ export default function Productos() {
   const [filtroCat, setFiltroCat] = useState('')
   const [filtroTipo, setFiltroTipo] = useState('')
   const [verDesc, setVerDesc] = useState(null)
+  const [imagenFile, setImagenFile] = useState(null)
+  const [imagenPreview, setImagenPreview] = useState(null)
+  const [subiendoImg, setSubiendoImg] = useState(false)
+  const [imagenAmpliada, setImagenAmpliada] = useState(null)
 
   const cargar = () => {
     api.get('/productos/').then(r => setProductos(r.data))
     api.get('/categorias/?activas=true').then(r => setCategorias(r.data))
   }
   useEffect(() => {
-    cargar()
-    window.addEventListener('focus', cargar)
-    return () => window.removeEventListener('focus', cargar)
-  }, [])
-
-  const abrirCrear = () => { setForm(FORM_VACIO); setEditId(null); setError(''); setModal(true) }
-  const abrirEditar = (p) => {
-    setForm({
-      nombre: p.nombre, id_categoria: p.id_categoria,
-      descripcion: p.descripcion || '',
-      precio_compra: p.precio_compra, precio: p.precio,
-      tipo_control: p.tipo_control,
-      stock_inicial: 0, stock_minimo: 5,
-      nivel_estado: p.nivel_estado || 'LLENO',
-    })
-    setEditId(p.id_producto); setError(''); setModal(true)
+  cargar()
+  
+  const intervalo = setInterval(() => {
+    api.get('/productos/').then(r => setProductos(r.data))
+  }, 5000)
+  
+  const handleVisibility = () => {
+    if (!document.hidden) cargar()
   }
+  document.addEventListener('visibilitychange', handleVisibility)
+  
+  return () => {
+    clearInterval(intervalo)
+    document.removeEventListener('visibilitychange', handleVisibility)
+  }
+}, [])
+
+  const abrirCrear = () => {
+    setForm(FORM_VACIO); setEditId(null); setError('')
+    setImagenFile(null); setImagenPreview(null)
+    setModal(true)
+  }
+  const abrirEditar = (p) => {
+     console.log('🔍 Producto a editar:', p)  // AÑADE ESTO
+  console.log('🔍 Imagen del producto:', p.imagen)  // AÑADE ESTO
+  setForm({
+    nombre: p.nombre,
+    id_categoria: p.id_categoria,
+    descripcion: p.descripcion || '',
+    precio_compra: p.precio_compra,
+    precio: p.precio,
+    tipo_control: p.tipo_control,
+    stock_inicial: 0,
+    stock_minimo: 5,
+    nivel_estado: p.nivel_estado || 'LLENO',
+    imagen: p.imagen || null,
+  })
+  setImagenFile(null)
+  
+ 
+  if (p.imagen) {
+    console.log('🖼️ URL preview:', `/uploads/${p.imagen}`) 
+    setImagenPreview(`/uploads/${p.imagen}`)
+  } else {
+    setImagenPreview(null)
+  }
+  
+  setEditId(p.id_producto)
+  setError('')
+  setModal(true)
+}
 
   const guardar = async (e) => {
     e.preventDefault(); setError('')
+    console.log('imagenFile al guardar:', imagenFile)
     try {
+      let formFinal = { ...form }
+
+      // Si hay una imagen nueva seleccionada, subirla primero
+      if (imagenFile) {
+        setSubiendoImg(true)
+        if (form.imagen && editId) {
+          const nombreArchivo = form.imagen.replace('productos/', '')
+          try {
+            await api.delete(`/upload/producto/${nombreArchivo}`)
+            console.log('Imagen anterior eliminada')
+          } catch (e) {
+            console.log('No se pudo eliminar imagen anterior')
+          }
+        }
+        
+        // Subir nueva imagen
+        const fd = new FormData()
+        fd.append('imagen', imagenFile)
+        const resImg = await api.post('/upload/producto', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        formFinal.imagen = resImg.data.imagen
+        setSubiendoImg(false)
+      }
+
       if (editId) {
-        await api.put(`/productos/${editId}`, form)
+        await api.put(`/productos/${editId}`, formFinal)
       } else {
-        await api.post('/productos/', form)
+        await api.post('/productos/', formFinal)
       }
       setModal(false); cargar()
+
+      setImagenPreview(null)
+      setImagenFile(null)
     } catch (err) {
+      setSubiendoImg(false)
       setError(err.response?.data?.error || 'Error al guardar')
     }
   }
@@ -68,6 +137,29 @@ export default function Productos() {
     await api.put(`/productos/${id}`, { estado: nuevoEstado })
     cargar()
   }
+
+  const seleccionarImagen = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  setImagenFile(file)
+  setImagenPreview(URL.createObjectURL(file))
+}
+
+// En el preview del modal:
+{imagenPreview && (
+  <img 
+    src={imagenPreview} 
+    alt="preview"
+    style={{ 
+      width: '100%', 
+      maxHeight: 180, 
+      objectFit: 'contain',
+      borderRadius: 6, 
+      marginBottom: 8, 
+      border: '1px solid #ddd' 
+    }}
+  />
+)}
 
   const filtrados = productos.filter(p => {
     const matchNombre = p.nombre.toLowerCase().includes(buscar.toLowerCase())
@@ -162,7 +254,18 @@ export default function Productos() {
                     <span onClick={() => setVerDesc(p)} title="Ver descripción" className="productos-ojo-icono">👁️</span>
                   )}
                 </td>
-                <td className="productos-td-nombre">{p.nombre}</td>
+                <td className="productos-td-nombre" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {p.imagen && (
+                    <img 
+                      src={`/uploads/${p.imagen}`}
+                      alt={p.nombre}
+                      onClick={() => setImagenAmpliada(p)}
+                      className="productos-imagen-tabla"
+                      onError={(e) => { e.target.style.display = 'none' }}
+                    />
+                  )}
+                  {p.nombre}
+                </td>
                 <td className="productos-td-categoria">{p.categoria}</td>
                 <td className="productos-td-precio">S/. {parseFloat(p.precio_compra).toFixed(2)}</td>
                 <td className="productos-td-precio">S/. {parseFloat(p.precio).toFixed(2)}</td>
@@ -176,7 +279,7 @@ export default function Productos() {
                   {p.tipo_control === 'nivel'
                     ? <span className={`productos-nivel-badge productos-nivel-${p.nivel_estado?.toLowerCase()}`}>
                         {p.nivel_estado === 'LLENO' ? '🟢 LLENO' :
-                         p.nivel_estado === 'MEDIO' ? '🟡 MEDIO' : '🔴 BAJO'}
+                        p.nivel_estado === 'MEDIO' ? '🟡 MEDIO' : '🔴 BAJO'}
                       </span>
                     : p.stock_actual
                   }
@@ -236,6 +339,32 @@ export default function Productos() {
                 <label className="productos-form-label">Descripción</label>
                 <textarea value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
                   rows={5} className="productos-form-textarea" />
+              </div>
+
+              <div className="productos-form-group">
+                <label className="productos-form-label">Foto del Producto</label>
+                {imagenPreview && (
+                    <img 
+                      src={imagenPreview}  // Este es un blob URL, no se toca
+                      alt="preview"
+                      style={{ width: '100%', maxHeight: 180, objectFit: 'contain', borderRadius: 6, marginBottom: 8, border: '1px solid #ddd' }}
+                    />
+                  )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {/* Tomar foto con cámara (móvil) */}
+                  <label className="productos-form-input" style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}>
+                    📷 Tomar Foto
+                    <input type="file" accept="image/*" capture="environment"
+                      onChange={seleccionarImagen} style={{ display: 'none' }} />
+                  </label>
+                  {/* Elegir desde explorador */}
+                  <label className="productos-form-input" style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}>
+                    🖼️ Elegir Archivo
+                    <input type="file" accept="image/*"
+                      onChange={seleccionarImagen} style={{ display: 'none' }} />
+                  </label>
+                </div>
+                {subiendoImg && <p style={{ fontSize: 12, color: '#888', marginTop: 6 }}>Subiendo imagen...</p>}
               </div>
 
               <div className="productos-form-group">
@@ -307,13 +436,36 @@ export default function Productos() {
 
               <div className="productos-modal-botones">
                 <button type="button" onClick={() => setModal(false)} className="productos-btn-cancelar">Cancelar</button>
-                <button type="submit" className="productos-btn-guardar">{editId ? 'Guardar Cambios' : 'Crear Producto'}</button>
-              </div>
+                <button type="submit" className="productos-btn-guardar" onClick={() => console.log('CLICK EN GUARDAR')}>{editId ? 'Guardar Cambios' : 'Crear Producto'}</button>              </div>
             </form>
           </div>
         </div>
       )}
-
+      {/* Modal imagen ampliada */}
+        {imagenAmpliada && (
+          <div 
+            onClick={() => setImagenAmpliada(null)} 
+            className="productos-imagen-ampliada-overlay"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="productos-imagen-ampliada-contenido"
+            >
+              <p className="productos-imagen-ampliada-titulo">{imagenAmpliada.nombre}</p>
+              <img 
+                src={`/uploads/${imagenAmpliada.imagen}`}
+                alt={imagenAmpliada.nombre}
+                className="productos-imagen-ampliada-img"
+              />
+              <button 
+                onClick={() => setImagenAmpliada(null)}
+                className="productos-imagen-ampliada-cerrar"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
       {/* Mini modal descripción */}
       {verDesc && (
         <div onClick={() => setVerDesc(null)} className="productos-desc-overlay">

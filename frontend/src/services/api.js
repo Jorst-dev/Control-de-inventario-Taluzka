@@ -2,13 +2,15 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: '/api',
-  headers: { 'Content-Type': 'application/json' },
 })
 
 // Inyectar token automáticamente en cada petición
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
+  if (!(config.data instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json'
+  }
   return config
 })
 
@@ -16,8 +18,11 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   err => {
-    if (err.response?.status === 401) {
+    // Solo cerrar sesión si es 401 y NO es login
+    if (err.response?.status === 401 && !err.config.url.includes('/auth/login')) {
+      console.warn('Sesión expirada')
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(err)

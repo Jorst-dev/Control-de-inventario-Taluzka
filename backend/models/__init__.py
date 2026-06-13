@@ -57,6 +57,7 @@ class Producto(db.Model):
     precio_compra = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     precio        = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     tipo_control  = db.Column(db.String(20), nullable=False, default="unidad")
+    imagen        = db.Column(db.String(255), nullable=True)
     estado        = db.Column(db.Boolean, default=True, nullable=False)
 
     movimientos      = db.relationship("Movimiento", backref="producto", lazy=True)
@@ -75,6 +76,7 @@ class Producto(db.Model):
             "precio":        float(self.precio),
             "ganancia":      round(float(self.precio) - float(self.precio_compra), 2),
             "tipo_control":  self.tipo_control,
+            "imagen":        self.imagen,
             "estado":        self.estado,
             "stock_actual":  ctrl.stock_actual if ctrl else 0,
             "stock_minimo":  ctrl.stock_minimo if ctrl else 0,
