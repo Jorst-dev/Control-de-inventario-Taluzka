@@ -1,8 +1,13 @@
 import axios from 'axios'
 
+//const api = axios.create({
+  //baseURL: '/api',
+//})
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://control-de-inventario-taluzka.onrender.com/api',
 })
+
 
 // Inyectar token automáticamente en cada petición
 api.interceptors.request.use(config => {
