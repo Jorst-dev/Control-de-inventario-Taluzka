@@ -84,7 +84,7 @@ def create_app():
     scheduler.add_job(hacer_backup, 'interval', hours=1)
     scheduler.start()
 
-    hacer_backup()
+    #hacer_backup()
 
 
     return app
@@ -109,7 +109,7 @@ def _crear_admin_inicial():
 #if __name__ == "__main__":
     #app = create_app()
     #app.run(debug=True, port=5000)
+app = create_app()
 
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=False, port=5000, host='0.0.0.0')
