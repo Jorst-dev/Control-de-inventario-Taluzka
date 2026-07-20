@@ -73,7 +73,7 @@ CREATE TABLE `categoria` (
 
 LOCK TABLES `categoria` WRITE;
 /*!40000 ALTER TABLE `categoria` DISABLE KEYS */;
-INSERT INTO `categoria` VALUES (1,'Pernos Expansivos T','Para las fijaciones',1),(2,'Tornillos Spack','Fijaciones en madera, melamina, etc...',1),(3,'Tornillos Drywall','Todos los tamaños para drywall',1),(4,'Tornillos wafer ','',1),(5,'Stobolts','',1),(6,'Clavos de cemento ','',1),(7,'Cintillos ','',1),(8,'Telescopicas','',1);
+INSERT INTO `categoria` VALUES (1,'Pernos Expansivos T7','Para las fijaciones',1),(2,'Tornillos Spack','Fijaciones en madera, melamina, etc...',1),(3,'Tornillos Drywall','Todos los tamaños para drywall',1),(4,'Tornillos wafer ','',1),(5,'Stobolts','',1),(6,'Clavos de cemento ','',1),(7,'Cintillos ','',1),(8,'Telescopicas','',1);
 /*!40000 ALTER TABLE `categoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -173,7 +173,7 @@ CREATE TABLE `producto` (
 
 LOCK TABLES `producto` WRITE;
 /*!40000 ALTER TABLE `producto` DISABLE KEYS */;
-INSERT INTO `producto` VALUES (1,1,'Perno expansivo 3/8 x 3','Ubicado en\n- Marca: Torfix\n- Lo que viene: 150 en la caja\n- UND:1.5\n- DOC:12\n- %:zz\n- Millar:',22.00,43.99,'caja',1,'productos/df77723cb7a54c60bff0aefe90f88283.jpg'),(2,8,'Corredera telescopica 10 Pesada','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',3.00,7.00,'caja',1,'productos/946a3ca56e84405c90ffd85db476d592.jpeg'),(3,5,'Stobol 5/32 x 1','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',15.00,30.00,'caja',1,'productos/1d520a89642240aca062800cab50b18f.jpg'),(4,4,'Tornillos wafer 8 x 1','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',12.00,23.00,'caja',1,NULL),(5,6,'Clavo cemento 3 pulgadas','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',4.50,9.00,'unidad',1,NULL);
+INSERT INTO `producto` VALUES (1,1,'Perno expansivo 3/8 x 3','Ubicado en\n- Marca: Torfix\n- Lo que viene: 150 en la caja\n- UND:1.5\n- DOC:12\n- %:zz\n- Millar:',22.00,43.99,'caja',1,'productos/7ae0264a7bec48659807fdf610cf49c3.jpg'),(2,8,'Telescopica 10 Pesada ','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',3.00,7.00,'caja',1,'productos/5be9649e5b294ba7acb89410079be9e6.jpg'),(3,5,'Stobol 5/32 x 1','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',15.00,30.00,'caja',1,'productos/11e0ac62f3b84eae905747540de1f93d.jpg'),(4,4,'Tornillos wafer 8 x 1','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',12.00,23.00,'caja',1,'productos/e3432b77a0d34692b99366dd96192268.jpg'),(5,6,'Clavo cemento 3 pulgadas','\n- Marca:\n- Lo que viene:\n- UND:\n- DOC:\n- %:\n- Millar:',4.50,9.00,'unidad',1,'productos/3ecfe0fc3aba4af984259e5121ceedf1.jpg');
 /*!40000 ALTER TABLE `producto` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -291,4 +291,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-13 16:00:23
+-- Dump completed on 2026-07-19 18:09:32
